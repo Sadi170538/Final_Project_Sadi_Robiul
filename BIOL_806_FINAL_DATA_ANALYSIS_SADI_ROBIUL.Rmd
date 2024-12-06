@@ -1,0 +1,310 @@
+---
+title: "final project result analysis"
+author: "Sadi &Robiul"
+date: "2024-12-06"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+```{r}
+# Set the working directory
+setwd("C:/Users/mt1468/OneDrive - USNH/Desktop/rice final project") 
+
+# Load the data
+rice_data <- read.csv("Rice.csv")
+
+# View the first few rows of the dataset
+head(rice_data)
+```
+```{r}
+# Basic summary statistics
+summary(rice_data)
+
+# Standard deviation for each numeric trait
+apply(rice_data[, -c(1,2)], 2, sd) # Assuming columns 1 and 2 are Variety and Replication
+```
+```{r}
+# ANOVA for Plant Height
+plant_height_aov <- aov(PH_cm ~ landraces, data = rice_data)
+summary(plant_height_aov)
+
+# Post-hoc analysis using Tukey's HSD
+TukeyHSD(plant_height_aov)
+```
+```{r}
+# ANOVA for Effective_.tiller_per_plant
+Effective_.tiller_per_plant_aov <- aov(ET.P ~ landraces, data = rice_data)
+summary(Effective_.tiller_per_plant_aov)
+
+# Post-hoc analysis using Tukey's HSD
+TukeyHSD(Effective_.tiller_per_plant_aov)
+```
+
+```{r}
+# ANOVA for Panicle_length._cm
+Panicle_length._cm_aov <- aov(PL_cm ~ landraces, data = rice_data)
+summary(Panicle_length._cm_aov)
+
+# Post-hoc analysis using Tukey's HSD
+TukeyHSD(Panicle_length._cm_aov)
+```
+
+```{r}
+# ANOVA for Filled_grain_per_panicle
+Filled_grain_per_panicle_aov <- aov(FG.P ~ landraces, data = rice_data)
+summary(Filled_grain_per_panicle_aov)
+
+# Post-hoc analysis using Tukey's HSD
+TukeyHSD(Filled_grain_per_panicle_aov)
+```
+
+```{r}
+# ANOVA for Unfilled_grain_per_panicle
+Unfilled_grain_per_panicle_aov <- aov(UG.P ~ landraces, data = rice_data)
+summary(Unfilled_grain_per_panicle_aov)
+
+# Post-hoc analysis using Tukey's HSD
+TukeyHSD(Unfilled_grain_per_panicle_aov)
+```
+
+```{r}
+# ANOVA for X1000_seed_weight_gm
+X1000_seed_weight_gm_aov <- aov(X1000SW_gm ~ landraces, data = rice_data)
+summary(X1000_seed_weight_gm_aov)
+
+# Post-hoc analysis using Tukey's HSD
+TukeyHSD(X1000_seed_weight_gm_aov)
+```
+
+```{r}
+# ANOVA for Grain_yield_tonn_per_ha
+Grain_yield_tonn_per_ha_aov <- aov(GY_t.ha ~ landraces, data = rice_data)
+summary(Grain_yield_tonn_per_ha_aov)
+
+# Post-hoc analysis using Tukey's HSD
+TukeyHSD(Grain_yield_tonn_per_ha_aov)
+print(Grain_yield_tonn_per_ha_aov)
+```
+
+```{r}
+# Boxplot for Plant Height
+boxplot(PH_cm ~ landraces, data = rice_data, main = "Plant Height by Landraces",
+        xlab = "Landraces", ylab = "Plant Height (cm)", las = 2, col = "lightblue")
+```
+
+```{r}
+summary(rice_data)
+```
+
+```{r}
+# Load necessary library
+library(ggplot2)
+library(dplyr)
+library(tidyverse)
+
+# Read the dataset
+rice_data <- read.csv("Rice.csv")
+
+# Ensure the landraces column is treated as a factor
+rice_data$landraces <- as.factor(rice_data$landraces)
+
+# Perform ANOVA for each quantitative trait
+traits <- c(" PH_cm", "ET.P", "PL_cm", 
+            "FG.P", "UG.P", 
+            "X1000SW_gm", "GY_t.ha")
+
+# Loop through traits to run ANOVA and display results
+for (trait in traits) {
+  print(paste("ANOVA for:", trait))
+  formula <- as.formula(paste(trait, "~ landraces"))
+  anova_result <- aov(formula, data = rice_data)
+  print(summary(anova_result))
+  
+  # Post-hoc test if significant
+  if (summary(anova_result)[[1]][["Pr(>F)"]][1] < 0.05) {
+    print("Tukey HSD Results:")
+    print(TukeyHSD(anova_result))
+  }
+}
+
+#  Visualize one of the traits (e.g., Grain Yield) with boxplot
+ggplot(rice_data, aes(x = landraces, y = GY_t.ha, fill = landraces)) +
+  geom_boxplot() +
+  labs(title = "Grain Yield Across Rice Landraces",
+       x = "Landraces",
+       y = "Grain Yield (t/ha)") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+```{r}
+# Load necessary libraries
+library(corrplot)
+
+# Load the data
+data <- read.csv("Rice.csv")
+
+# Select only numerical columns for correlation analysis
+numerical_data <- data %>% select(-landraces)
+
+# Calculate the correlation matrix
+correlation_matrix <- cor(numerical_data, method = "pearson")
+
+# Print the correlation matrix
+print(correlation_matrix)
+
+# Adjust outer margins for the main title
+par(oma = c(0, 0, 3, 0)) # Bottom, left, top, right margins for the outer area
+
+# Visualize the correlation matrix as a heatmap
+corrplot(correlation_matrix, method = "color", type = "upper", 
+         tl.col = "black", tl.cex = 0.8, number.cex = 0.7, 
+         addCoef.col = "black")
+
+# Add the title
+mtext("Correlation Matrix of Rice Traits", outer = TRUE, cex = 1.5, col = "black", line = 1)
+
+# Reset graphical parameters
+par(oma = c(0, 0, 0, 0))
+```
+
+```{r}
+# Load necessary libraries
+library(tidyverse)
+library(heatmaply)
+
+# Load the data
+data <- read.csv("Rice.csv")
+
+# Inspect the structure of the data
+str(data)
+
+# Calculate the mean across replications for each landrace
+# Assuming the dataset contains columns: "Landrace", "Replication", and trait columns
+data_mean <- data %>%
+  group_by(landraces) %>%
+  summarise(across(where(is.numeric), mean, na.rm = TRUE))
+
+# Remove the "Landrace" column for distance computation
+traits_data <- data_mean %>% select(-landraces)
+
+# Compute Euclidean distance for dissimilarity
+distance_matrix <- dist(traits_data, method = "euclidean")
+
+# Convert to a matrix for heatmap visualization
+distance_matrix <- as.matrix(distance_matrix)
+
+# Add row and column names (Landrace names)
+rownames(distance_matrix) <- data_mean$landraces
+colnames(distance_matrix) <- data_mean$landraces
+
+# Plot the heatmap
+heatmaply(
+  distance_matrix,
+  main = "Genetic Dissimilarity Heatmap of Rice Landraces",
+  xlab = "Landraces",
+  ylab = "Landraces",
+  colors = colorRampPalette(c("green", "white", "red"))(100),
+  dendrogram = "none", # Exclude hierarchical clustering
+  plot_method = "plotly"
+)
+```
+
+```{r}
+# Load necessary libraries
+library(ggplot2)
+library(cluster)
+
+# Read the dataset and ensure it is a data frame
+rice_data <- read.csv("Rice.csv")
+
+# Check the structure of the dataset
+str(rice_data)
+
+# Ensure the dataset is treated as a data frame
+rice_data <- as.data.frame(rice_data)
+
+# Aggregate the data by 'landraces' (mean across replications)
+# Assuming the first column is 'landraces' and the rest are numeric
+aggregated_data <- aggregate(. ~ landraces, data = rice_data, FUN = mean)
+
+# Exclude the first non-numeric column ('landraces') for clustering
+numeric_data <- aggregated_data[, -1]  # Remove the first column (landraces)
+
+# Normalize the numeric data
+normalized_data <- scale(numeric_data)
+
+# Compute the distance matrix
+distance_matrix <- dist(normalized_data, method = "euclidean")
+
+# Perform hierarchical clustering (complete linkage)
+hc <- hclust(distance_matrix, method = "complete")
+
+# Plot the dendrogram with landrace labels
+plot(hc, labels = aggregated_data$landraces, main = "Dendrogram of Rice Landraces",
+     xlab = "Landraces", sub = "", cex = 0.8)
+
+```
+
+```{r}
+# Load necessary libraries
+library(ggplot2)
+library(dplyr)
+
+# Read the dataset
+data <- read.csv("Rice.csv")
+
+# Aggregate data by landraces to calculate means for plotting
+agg_data <- data %>%
+  group_by(landraces) %>%
+  summarise(across(PH_cm:GY_t.ha, mean))
+
+# Bar Plot: Average Grain Yield (GY_t/ha) for each landrace
+ggplot(agg_data, aes(x = reorder(landraces, -GY_t.ha), y = GY_t.ha)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  labs(title = "Average Grain Yield by Landrace", x = "Landrace", y = "Grain Yield (t/ha)") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Scatter Plot: Relationship between Seed Weight and Grain Yield
+ggplot(data, aes(x = X1000SW_gm, y = GY_t.ha, color = landraces)) +
+  geom_point(size = 3) +
+  labs(title = "Relationship between Seed Weight and Grain Yield",
+       x = "1000 Seed Weight (gm)", y = "Grain Yield (t/ha)") +
+  theme_minimal()
+
+# Scatter Plot: Filled Grains vs Grain Yield
+ggplot(data, aes(x = FG.P, y = GY_t.ha, color = landraces)) +
+  geom_point(size = 3) +
+  labs(title = "Filled Grains vs Grain Yield",
+       x = "Filled Grains per Panicle", y = "Grain Yield (t/ha)") +
+  theme_minimal()
+
+
+```
+
